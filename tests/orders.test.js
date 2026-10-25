@@ -139,6 +139,17 @@ describe('Orders API', () => {
     expect(res.body).toHaveProperty('error');
   });
 
+  it("should return 404 when reading another user's order", async () => {
+    const { token: otherToken } = await registerUser();
+    const res = await request(app)
+      .get(`/api/orders/${orderId}`)
+      .set('Authorization', `Bearer ${otherToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('data', null);
+    expect(res.body).toHaveProperty('error', 'NOT_FOUND');
+  });
+
   it('should reject non-string recipient fields', async () => {
     const res = await request(app)
       .post('/api/orders')
