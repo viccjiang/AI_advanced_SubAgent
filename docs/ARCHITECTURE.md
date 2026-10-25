@@ -34,6 +34,7 @@
 │   │   └── errorHandler.js         # 全域錯誤處理：依狀態碼對應錯誤碼與安全訊息，500 一律回「伺服器內部錯誤」
 │   ├── utils/
 │   │   ├── coupon.js               # 優惠碼純邏輯：規則表、大小寫正規化、門檻與折扣計算
+│   │   ├── orderQuery.js           # 會員訂單列表查詢規則：狀態篩選、page/limit 驗證與上限、分頁資訊
 │   │   ├── ecpay.js                # 綠界 ECPay 工具：CheckMacValue 簽章、URL 編碼、AIO 表單產生、QueryTradeInfo 查詢
 │   │   ├── shipping.js             # 配送費用純邏輯：基本運費、免運門檻、偏遠/急件附加費
 │   │   └── validators.js           # 共用輸入驗證：非空字串、選填字串、正整數
@@ -101,7 +102,8 @@
     │   └── integrationGlobalSetup.mjs # 原 database.sqlite 雜湊守衛
     ├── integration/
     │   ├── helpers.js               # fixture、DB reset 與查詢輔助
-    │   └── order-checkout.integration.test.js # 結帳、DB、回滾、ECPay 整合測試
+    │   ├── order-checkout.integration.test.js # 結帳、DB、回滾、ECPay 整合測試
+    │   └── order-list.integration.test.js # 會員訂單列表：分頁排序、狀態篩選、會員隔離
     ├── e2e/
     │   ├── global-setup.js          # 僅探測既有服務，不啟動伺服器
     │   └── ecpay-atm-payment.spec.js # UI 建單與綠界土地銀行付款 E2E
@@ -112,6 +114,7 @@
     │   └── order-filter.test.js     # Issue C：我的訂單篩選與分頁
     ├── shipping.test.js            # Shipping 模組單元測試（13 項）
     ├── coupon.test.js              # Coupon 模組單元測試（22 項）
+    ├── orderQuery.test.js          # 訂單列表查詢規則單元測試（33 項）
     ├── auth.test.js                # 認證 API 測試
     ├── products.test.js            # 商品 API 測試
     ├── cart.test.js                # 購物車 API 測試

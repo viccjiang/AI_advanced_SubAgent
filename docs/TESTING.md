@@ -140,7 +140,8 @@ Integration Test 中有兩層防護：
 | `tests/auth.test.js` | 註冊、登入、重複 Email、個人資料、非字串欄位、JSON 格式錯誤 |
 | `tests/products.test.js` | 商品列表、分頁、詳情與 404 |
 | `tests/cart.test.js` | 訪客/會員購物車 CRUD、數量驗證、登入/註冊時合併訪客購物車（含庫存上限） |
-| `tests/orders.test.js` | 建單、配送費、查詢與認證、模擬付款僅限測試環境 |
+| `tests/orderQuery.test.js` | 訂單列表查詢規則：status 允許值、page/limit 預設、正整數驗證與 50 筆上限、totalPages |
+| `tests/orders.test.js` | 建單、配送費、查詢與認證、訂單列表分頁格式與參數驗證、模擬付款僅限測試環境 |
 | `tests/adminProducts.test.js` | 後台商品 CRUD 與權限、刪除仍在購物車中的商品、名稱驗證 |
 | `tests/adminOrders.test.js` | 後台訂單列表、詳情與篩選 |
 
@@ -148,7 +149,7 @@ Integration Test 中有兩層防護：
 
 ## Integration Test
 
-主測試檔：`tests/integration/order-checkout.integration.test.js`
+主測試檔：`tests/integration/order-checkout.integration.test.js`；會員訂單列表另見 `tests/integration/order-list.integration.test.js`（12 筆跨頁排序不重複、超出最後一頁、狀態篩選與 total、無符合狀態時空結果、未登入 401、會員隔離、參數錯誤與超大頁碼 400）
 
 | 情境 | 主要斷言 |
 |------|----------|
