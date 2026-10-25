@@ -46,6 +46,7 @@
       >
         {{ loadingMore ? '載入中…' : '載入更多訂單' }}
       </button>
+      <p v-if="loadError" class="text-sm text-red-600 mt-2">{{ loadError }}</p>
     </div>
   </div>
 </div>

@@ -50,7 +50,13 @@ describe('Order list query module', () => {
       ['page 空字串', { page: '' }],
       ['limit=0', { limit: '0' }],
       ['limit=-1', { limit: '-1' }],
-      ['limit=3abc', { limit: '3abc' }]
+      ['limit=3abc', { limit: '3abc' }],
+      ['limit=1.5', { limit: '1.5' }],
+      ['limit 空字串', { limit: '' }],
+      ['page 為陣列', { page: ['1', '2'] }],
+      ['page 為物件', { page: { a: '1' } }],
+      ['page 超過安全整數', { page: '100000000000000000000' }],
+      ['page × limit 超過安全整數', { page: '9007199254740991', limit: '10' }]
     ])('%s回傳錯誤', (_label, query) => {
       expect(() => parseOrderListQuery(query)).toThrow(OrderQueryError);
     });

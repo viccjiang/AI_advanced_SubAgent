@@ -149,7 +149,7 @@ Integration Test 中有兩層防護：
 
 ## Integration Test
 
-主測試檔：`tests/integration/order-checkout.integration.test.js`；會員訂單列表另見 `tests/integration/order-list.integration.test.js`（12 筆跨頁排序不重複、超出最後一頁、狀態篩選與 total、會員隔離、參數錯誤 400）
+主測試檔：`tests/integration/order-checkout.integration.test.js`；會員訂單列表另見 `tests/integration/order-list.integration.test.js`（12 筆跨頁排序不重複、超出最後一頁、狀態篩選與 total、無符合狀態時空結果、未登入 401、會員隔離、參數錯誤與超大頁碼 400）
 
 | 情境 | 主要斷言 |
 |------|----------|

@@ -114,7 +114,7 @@
     │   └── order-filter.test.js     # Issue C：我的訂單篩選與分頁
     ├── shipping.test.js            # Shipping 模組單元測試（13 項）
     ├── coupon.test.js              # Coupon 模組單元測試（22 項）
-    ├── orderQuery.test.js          # 訂單列表查詢規則單元測試（27 項）
+    ├── orderQuery.test.js          # 訂單列表查詢規則單元測試（33 項）
     ├── auth.test.js                # 認證 API 測試
     ├── products.test.js            # 商品 API 測試
     ├── cart.test.js                # 購物車 API 測試

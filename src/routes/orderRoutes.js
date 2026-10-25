@@ -303,6 +303,11 @@ router.post('/', (req, res) => {
  *                             type: integer
  *                           shipping_method:
  *                             type: string
+ *                             enum: [home_delivery, convenience_store]
+ *                           is_remote_area:
+ *                             type: boolean
+ *                           is_express:
+ *                             type: boolean
  *                           total_amount:
  *                             type: integer
  *                           status:
@@ -326,7 +331,7 @@ router.post('/', (req, res) => {
  *                 message:
  *                   type: string
  *       400:
- *         description: status 不在允許值內，或 page、limit 不是正整數（VALIDATION_ERROR）
+ *         description: status 不在允許值內、page 或 limit 不是正整數，或 page 超出可查詢範圍（VALIDATION_ERROR）
  */
 router.get('/', (req, res) => {
   let query;

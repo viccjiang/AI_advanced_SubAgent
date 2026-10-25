@@ -8,6 +8,7 @@ createApp({
     const loading = ref(true);
     const loadingMore = ref(false);
     const pagination = ref(null);
+    const loadError = ref('');
 
     const statusMap = {
       pending: { label: '待付款', cls: 'bg-apricot/20 text-apricot' },
@@ -15,10 +16,12 @@ createApp({
       failed: { label: '付款失敗', cls: 'bg-red-100 text-red-600' },
     };
 
-    // API returns one page at a time; append the next page on demand
+    // API returns one page at a time; append the next page on demand.
+    // Skip ids already shown in case new orders shifted the offset.
     async function fetchPage(page) {
       const res = await apiFetch('/api/orders?page=' + page);
-      orders.value = orders.value.concat(res.data.orders);
+      const seen = new Set(orders.value.map(function (order) { return order.id; }));
+      orders.value = orders.value.concat(res.data.orders.filter(function (order) { return !seen.has(order.id); }));
       pagination.value = res.data.pagination;
     }
 
@@ -29,10 +32,12 @@ createApp({
     async function loadMore() {
       if (!hasMore() || loadingMore.value) return;
       loadingMore.value = true;
+      loadError.value = '';
       try {
         await fetchPage(pagination.value.page + 1);
       } catch (e) {
         // keep the orders already shown
+        loadError.value = '載入失敗，請稍後再試';
       } finally {
         loadingMore.value = false;
       }
@@ -48,6 +53,6 @@ createApp({
       }
     });
 
-    return { orders, loading, loadingMore, statusMap, formatDate, hasMore, loadMore };
+    return { orders, loading, loadingMore, loadError, statusMap, formatDate, hasMore, loadMore };
   }
 }).mount('#app');

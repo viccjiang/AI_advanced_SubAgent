@@ -15,7 +15,7 @@
 | 後台訂單管理 | ✅ 完成 | 訂單查詢與狀態篩選 |
 | 前台頁面 | ✅ 完成 | EJS + Tailwind CSS |
 | 後台頁面 | ✅ 完成 | EJS + Tailwind CSS |
-| 測試 | ✅ 完成 | 107 項 Unit/API + 16 項 Integration + 1 項綠界真實付款 E2E |
+| 測試 | ✅ 完成 | 113 項 Unit/API + 18 項 Integration + 1 項綠界真實付款 E2E |
 | API 文件 | ✅ 完成 | Swagger/OpenAPI 生成與 Postman Collection 自動轉換 |
 
 ---
@@ -329,9 +329,10 @@
 
 | 狀態碼 | 錯誤碼 | 情境 |
 |--------|--------|------|
-| 400 | VALIDATION_ERROR | `status` 不在允許值內，或 `page`、`limit` 不是正整數 |
+| 400 | VALIDATION_ERROR | `status` 不在允許值內（含空字串），或 `page`、`limit` 不是正整數 |
+| 400 | VALIDATION_ERROR | `page` 過大（`page × limit` 超過安全整數範圍） |
 
-**前端**：`/orders` 頁面一次載入一頁，有下一頁時顯示「載入更多訂單」按鈕。
+**前端**：`/orders` 頁面一次載入一頁，有下一頁時顯示「載入更多訂單」按鈕；合併時依 id 去除重複，載入失敗時顯示提示。
 
 ### GET /api/orders/:id — 訂單詳情
 

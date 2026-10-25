@@ -35,10 +35,16 @@ function parseOrderListQuery(query = {}) {
     throw new OrderQueryError('limit 必須為正整數');
   }
 
+  const cappedLimit = Math.min(parsedLimit, MAX_LIMIT);
+  // Huge page numbers lose precision and overflow SQLite OFFSET
+  if (!Number.isSafeInteger(parsedPage * cappedLimit)) {
+    throw new OrderQueryError('page 超出可查詢範圍');
+  }
+
   return {
     status: status === undefined ? null : status,
     page: parsedPage,
-    limit: Math.min(parsedLimit, MAX_LIMIT)
+    limit: cappedLimit
   };
 }
 

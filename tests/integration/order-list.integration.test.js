@@ -85,8 +85,23 @@ describe('Member order list integration', () => {
     expect(res.body.data.pagination).toEqual({ page: 1, limit: 2, total: 4, totalPages: 2 });
   });
 
+  it('沒有符合狀態的訂單時回傳空陣列與 total 0', async () => {
+    const res = await listOrders(member.token, '?status=failed');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.orders).toEqual([]);
+    expect(res.body.data.pagination).toEqual({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  });
+
+  it('未登入時回傳 401', async () => {
+    const res = await request(app).get('/api/orders');
+
+    expect(res.status).toBe(401);
+    expect(res.body.data).toBeNull();
+  });
+
   it('參數錯誤時回傳 400 VALIDATION_ERROR 且 data 為 null', async () => {
-    for (const query of ['?status=unknown', '?page=0', '?limit=-1', '?page=abc']) {
+    for (const query of ['?status=unknown', '?page=0', '?limit=-1', '?page=abc', '?page=100000000000000000000']) {
       const res = await listOrders(member.token, query);
 
       expect(res.status).toBe(400);
