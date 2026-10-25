@@ -15,7 +15,7 @@
 | 後台訂單管理 | ✅ 完成 | 訂單查詢與狀態篩選 |
 | 前台頁面 | ✅ 完成 | EJS + Tailwind CSS |
 | 後台頁面 | ✅ 完成 | EJS + Tailwind CSS |
-| 測試 | ✅ 完成 | 79 項 Unit/API + 12 項 Integration + 1 項綠界真實付款 E2E |
+| 測試 | ✅ 完成 | 107 項 Unit/API + 16 項 Integration + 1 項綠界真實付款 E2E |
 | API 文件 | ✅ 完成 | Swagger/OpenAPI 生成與 Postman Collection 自動轉換 |
 
 ---
@@ -311,9 +311,27 @@
 
 ### GET /api/orders — 訂單列表
 
-**行為描述**：回傳當前使用者的所有訂單，依建立時間降序排列。無分頁。
+**行為描述**：回傳當前使用者的訂單，可依狀態篩選並分頁，依建立時間由新到舊排列（同一秒建立時以寫入順序為準）。只會回傳自己的訂單。查詢規則集中在 `src/utils/orderQuery.js`。
 
-**回應欄位**：id, order_no, subtotal, discount, coupon_code, shipping_fee, shipping_method, is_remote_area, is_express, total_amount, status, created_at
+**Query 參數**：
+
+| 參數 | 型別 | 預設 | 說明 |
+|------|------|------|------|
+| status | string | 不篩選 | `pending`、`paid`、`failed` 其中之一 |
+| page | 正整數 | 1 | 頁碼；超出最後一頁時回傳空陣列 |
+| limit | 正整數 | 10 | 每頁筆數，最大 50，超過以 50 計 |
+
+**回應格式**：`{ data: { orders: [...], pagination: { page, limit, total, totalPages } }, error, message }`（與 `GET /api/admin/orders` 相同）
+
+**訂單欄位**：id, order_no, subtotal, discount, coupon_code, shipping_fee, shipping_method, is_remote_area, is_express, total_amount, status, created_at
+
+**錯誤碼**：
+
+| 狀態碼 | 錯誤碼 | 情境 |
+|--------|--------|------|
+| 400 | VALIDATION_ERROR | `status` 不在允許值內，或 `page`、`limit` 不是正整數 |
+
+**前端**：`/orders` 頁面一次載入一頁，有下一頁時顯示「載入更多訂單」按鈕。
 
 ### GET /api/orders/:id — 訂單詳情
 

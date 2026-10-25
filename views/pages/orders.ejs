@@ -36,5 +36,16 @@
         </div>
       </div>
     </a>
+
+    <div v-if="hasMore()" class="text-center pt-2">
+      <button
+        type="button"
+        class="px-6 py-2 rounded-full text-sm border border-rose-primary text-rose-primary hover:bg-rose-primary hover:text-white transition-colors disabled:opacity-50"
+        :disabled="loadingMore"
+        @click="loadMore"
+      >
+        {{ loadingMore ? '載入中…' : '載入更多訂單' }}
+      </button>
+    </div>
   </div>
 </div>

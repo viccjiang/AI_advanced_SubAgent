@@ -105,6 +105,17 @@ describe('Orders API', () => {
     expect(res.body.data).toHaveProperty('orders');
     expect(Array.isArray(res.body.data.orders)).toBe(true);
     expect(res.body.data.orders.length).toBeGreaterThan(0);
+    expect(res.body.data.pagination).toMatchObject({ page: 1, limit: 10 });
+  });
+
+  it('should reject invalid order list query', async () => {
+    const res = await request(app)
+      .get('/api/orders?status=shipped')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.data).toBeNull();
+    expect(res.body.error).toBe('VALIDATION_ERROR');
   });
 
   it('should get order detail', async () => {

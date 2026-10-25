@@ -7,6 +7,7 @@
 ### Added
 - 結帳優惠碼（#1）：新增 `src/utils/coupon.js`，支援 `FLOWER100`（滿 800 折 100）與 `SPRING10`（9 折、最多折 300），`SUMMER50` 已失效。`POST /api/orders` 可傳 `couponCode`，訂單新增 `coupon_code`、`discount` 欄位；免運門檻以折扣後小計判斷
 - 新增 `tests/coupon.test.js`（22 項）與 2 項優惠碼 Integration Test（折扣寫入與免運判斷、優惠碼被拒時不建立訂單）
+- 我的訂單篩選與分頁（#3）：`GET /api/orders` 支援 `status`、`page`、`limit`（預設 10、最大 50），回應新增 `pagination`；參數錯誤回 400 `VALIDATION_ERROR`。新增 `src/utils/orderQuery.js`、`tests/orderQuery.test.js`（27 項）與 `tests/integration/order-list.integration.test.js`（4 項）；前台訂單頁改為分頁載入並提供「載入更多訂單」
 
 ### Changed
 - 抽出 `src/services/orderService.js`（訂單查詢、序列化與建單 transaction）與 `src/services/paymentService.js`（QueryTradeInfo 結果判斷與付款狀態更新）

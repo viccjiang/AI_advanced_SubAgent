@@ -17,6 +17,7 @@ const {
 } = require('../services/orderService');
 const { isTradePaid, markOrderPaid } = require('../services/paymentService');
 const { isNonEmptyString } = require('../utils/validators');
+const { OrderQueryError, parseOrderListQuery, buildPagination } = require('../utils/orderQuery');
 
 const router = express.Router();
 
@@ -247,10 +248,30 @@ router.post('/', (req, res) => {
  * @openapi
  * /api/orders:
  *   get:
- *     summary: 自己的訂單列表
+ *     summary: 自己的訂單列表（可依狀態篩選、分頁）
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, paid, failed]
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         description: 每頁筆數，超過 50 以 50 計
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 50
+ *           default: 10
  *     responses:
  *       200:
  *         description: 成功
@@ -288,17 +309,43 @@ router.post('/', (req, res) => {
  *                             type: string
  *                           created_at:
  *                             type: string
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         page:
+ *                           type: integer
+ *                         limit:
+ *                           type: integer
+ *                         total:
+ *                           type: integer
+ *                         totalPages:
+ *                           type: integer
  *                 error:
  *                   type: string
  *                   nullable: true
  *                 message:
  *                   type: string
+ *       400:
+ *         description: status 不在允許值內，或 page、limit 不是正整數（VALIDATION_ERROR）
  */
 router.get('/', (req, res) => {
-  const orders = listOrdersForUser(req.user.userId);
+  let query;
+  try {
+    query = parseOrderListQuery(req.query);
+  } catch (err) {
+    if (err instanceof OrderQueryError) {
+      return res.status(400).json({ data: null, error: err.code, message: err.message });
+    }
+    throw err;
+  }
+
+  const { orders, total } = listOrdersForUser(req.user.userId, query);
 
   res.json({
-    data: { orders: orders.map(serializeOrder) },
+    data: {
+      orders: orders.map(serializeOrder),
+      pagination: buildPagination({ page: query.page, limit: query.limit, total })
+    },
     error: null,
     message: '成功'
   });
