@@ -33,6 +33,7 @@
 │   │   ├── sessionMiddleware.js    # 提取 X-Session-Id header → 設定 req.sessionId（訪客購物車用）
 │   │   └── errorHandler.js         # 全域錯誤處理：依狀態碼對應錯誤碼與安全訊息，500 一律回「伺服器內部錯誤」
 │   ├── utils/
+│   │   ├── coupon.js               # 優惠碼純邏輯：規則表、大小寫正規化、門檻與折扣計算
 │   │   ├── ecpay.js                # 綠界 ECPay 工具：CheckMacValue 簽章、URL 編碼、AIO 表單產生、QueryTradeInfo 查詢
 │   │   ├── shipping.js             # 配送費用純邏輯：基本運費、免運門檻、偏遠/急件附加費
 │   │   └── validators.js           # 共用輸入驗證：非空字串、選填字串、正整數
@@ -110,6 +111,7 @@
     │   ├── cancel-order.test.js     # Issue B：取消未付款訂單並回補庫存
     │   └── order-filter.test.js     # Issue C：我的訂單篩選與分頁
     ├── shipping.test.js            # Shipping 模組單元測試（13 項）
+    ├── coupon.test.js              # Coupon 模組單元測試（22 項）
     ├── auth.test.js                # 認證 API 測試
     ├── products.test.js            # 商品 API 測試
     ├── cart.test.js                # 購物車 API 測試
@@ -368,12 +370,14 @@ server.js
 | recipient_name | TEXT | NOT NULL | 收件人姓名 |
 | recipient_email | TEXT | NOT NULL | 收件人 Email |
 | recipient_address | TEXT | NOT NULL | 收件地址 |
-| subtotal | INTEGER | NOT NULL | 下單時商品小計快照 |
+| subtotal | INTEGER | NOT NULL | 下單時商品小計快照（折扣前） |
+| coupon_code | TEXT | 可為 NULL | 使用的優惠碼（大寫），未使用時為 NULL |
+| discount | INTEGER | NOT NULL DEFAULT 0 | 優惠碼折扣金額 |
 | shipping_fee | INTEGER | NOT NULL DEFAULT 0 | 實收運費（基本運費 + 附加費） |
 | shipping_method | TEXT | NOT NULL DEFAULT 'home_delivery' | `home_delivery` 或 `convenience_store` |
 | is_remote_area | INTEGER | NOT NULL DEFAULT 0 | 偏遠地區快照（0/1） |
 | is_express | INTEGER | NOT NULL DEFAULT 0 | 當日急件快照（0/1） |
-| total_amount | INTEGER | NOT NULL | 訂單總金額（`subtotal + shipping_fee`） |
+| total_amount | INTEGER | NOT NULL | 訂單總金額（`subtotal - discount + shipping_fee`） |
 | status | TEXT | NOT NULL DEFAULT 'pending', CHECK IN ('pending','paid','failed') | 訂單狀態 |
 | merchant_trade_no | TEXT | 可為 NULL | 綠界交易編號（由 order_no 去除連字號產生，如 `ORD20260412A1B2C`） |
 | created_at | TEXT | NOT NULL DEFAULT datetime('now') | 建立時間 |
@@ -401,10 +405,11 @@ server.js
 ├─ 3. 檢查購物車是否為空 → 400 CART_EMPTY
 ├─ 4. 檢查每個品項庫存是否充足 → 400 STOCK_INSUFFICIENT（列出所有不足商品名稱）
 ├─ 5. 計算 subtotal = Σ(price × quantity)
-├─ 6. Shipping 模組計算 shippingFee 與 totalAmount = subtotal + shippingFee
-├─ 7. 生成 orderNo: ORD-YYYYMMDD-{5碼UUID}
+├─ 6. Coupon 模組計算 discount；優惠碼無效/失效/未達門檻 → 400（尚未寫入任何資料）
+├─ 7. Shipping 模組以 subtotal - discount 計算 shippingFee 與 totalAmount = subtotal - discount + shippingFee
+├─ 8. 生成 orderNo: ORD-YYYYMMDD-{5碼UUID}
 │
-└─ 8. 🔒 Transaction 開始
+└─ 9. 🔒 Transaction 開始
      ├─ INSERT orders 記錄
      ├─ 對每個購物車品項：
      │   ├─ INSERT order_items（快照 product_name, product_price）
@@ -412,7 +417,7 @@ server.js
      └─ DELETE cart_items WHERE user_id = ?
      🔒 Transaction 結束
 │
-└─ 9. 回傳 201 + subtotal、shipping_fee、total_amount 與訂單詳情
+└─ 10. 回傳 201 + subtotal、discount、coupon_code、shipping_fee、total_amount 與訂單詳情
 ```
 
 ## Shipping 模組
