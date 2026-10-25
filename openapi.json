@@ -245,6 +245,10 @@
                   },
                   "isExpress": {
                     "type": "boolean"
+                  },
+                  "couponCode": {
+                    "type": "string",
+                    "description": "選填，不分大小寫（FLOWER100、SPRING10）"
                   }
                 }
               }
@@ -270,6 +274,15 @@
                         },
                         "subtotal": {
                           "type": "integer"
+                        },
+                        "discount": {
+                          "type": "integer",
+                          "description": "優惠碼折扣金額，未使用時為 0"
+                        },
+                        "coupon_code": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "使用的優惠碼（大寫），未使用時為 null"
                         },
                         "shipping_fee": {
                           "type": "integer"
@@ -328,7 +341,7 @@
             }
           },
           "400": {
-            "description": "購物車為空或庫存不足或收件資訊缺失"
+            "description": "購物車為空、庫存不足、收件資訊缺失，或優惠碼無效、已失效、未達門檻（COUPON_INVALID / COUPON_EXPIRED / COUPON_NOT_ELIGIBLE）"
           }
         }
       },
@@ -366,6 +379,13 @@
                               },
                               "subtotal": {
                                 "type": "integer"
+                              },
+                              "discount": {
+                                "type": "integer"
+                              },
+                              "coupon_code": {
+                                "type": "string",
+                                "nullable": true
                               },
                               "shipping_fee": {
                                 "type": "integer"
@@ -451,6 +471,15 @@
                         },
                         "subtotal": {
                           "type": "integer"
+                        },
+                        "discount": {
+                          "type": "integer",
+                          "description": "優惠碼折扣金額，未使用時為 0"
+                        },
+                        "coupon_code": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "使用的優惠碼（大寫），未使用時為 null"
                         },
                         "shipping_fee": {
                           "type": "integer"
@@ -1629,6 +1658,13 @@
                               "subtotal": {
                                 "type": "integer"
                               },
+                              "discount": {
+                                "type": "integer"
+                              },
+                              "coupon_code": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "shipping_fee": {
                                 "type": "integer"
                               },
@@ -1733,6 +1769,13 @@
                         },
                         "subtotal": {
                           "type": "integer"
+                        },
+                        "discount": {
+                          "type": "integer"
+                        },
+                        "coupon_code": {
+                          "type": "string",
+                          "nullable": true
                         },
                         "shipping_fee": {
                           "type": "integer"

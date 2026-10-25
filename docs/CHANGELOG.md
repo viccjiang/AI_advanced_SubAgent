@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+- 結帳優惠碼（#1）：新增 `src/utils/coupon.js`，支援 `FLOWER100`（滿 800 折 100）與 `SPRING10`（9 折、最多折 300），`SUMMER50` 已失效。`POST /api/orders` 可傳 `couponCode`，訂單新增 `coupon_code`、`discount` 欄位；免運門檻以折扣後小計判斷
+- 新增 `tests/coupon.test.js`（22 項）與 2 項優惠碼 Integration Test（折扣寫入與免運判斷、優惠碼被拒時不建立訂單）
+
 ### Changed
 - 抽出 `src/services/orderService.js`（訂單查詢、序列化與建單 transaction）與 `src/services/paymentService.js`（QueryTradeInfo 結果判斷與付款狀態更新）
 - 新增 `src/utils/validators.js` 統一路由輸入驗證；Shipping 模組改以規則表描述，單元測試改為 table-driven
@@ -12,6 +16,10 @@
 
 ### Fixed
 - 修正 macOS 上 Vitest 測試隨機失敗（401、200 或逾時）：supertest 自開的臨時伺服器綁在 `::`、卻連到 `127.0.0.1`，可能連到同埠的其他程式。新增 `tests/setup/testServer.js` 先在 `127.0.0.1` 開好伺服器，Unit、Integration 與驗收測試皆改用它
+- `GET /api/orders/:id` 限定訂單擁有者，他人訂單回 404
+- QueryTradeInfo 回應缺少 CheckMacValue 時不再視為已付款
+- 商品小計剛好 1,500 元時免基本運費
+- `PATCH /api/cart/:itemId` 數量須為正整數
 
 ## [1.2.0] - 2026-10-06
 

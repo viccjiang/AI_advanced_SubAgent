@@ -107,6 +107,18 @@ function initializeDatabase() {
 
   db.prepare('UPDATE orders SET subtotal = total_amount WHERE subtotal = 0').run();
 
+  // Migration: add coupon snapshot columns; legacy orders have no discount.
+  const couponColumns = [
+    ['coupon_code', 'TEXT'],
+    ['discount', 'INTEGER NOT NULL DEFAULT 0']
+  ];
+
+  for (const [column, definition] of couponColumns) {
+    if (!orderColumns.has(column)) {
+      db.exec(`ALTER TABLE orders ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
   // Seed data
   seedAdminUser();
   seedProducts();

@@ -273,6 +273,55 @@ describe('Order checkout integration flow', () => {
     expect(cartItem.quantity).toBe(3);
   });
 
+  it('persists the coupon discount and judges free shipping on the discounted subtotal', async () => {
+    const product = createProduct({ price: 800 });
+    const member = await registerMember('coupon-member@example.com');
+    await addProductToCart(member.token, product.id, 2);
+
+    const response = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${member.token}`)
+      .send({ ...ORDER_PAYLOAD, couponCode: 'flower100' });
+
+    // 1600 - 100 = 1500 waives the 60 base fee; remote 200 + express 250 still apply
+    expectEnvelope(response, 201);
+    expect(response.body.data).toMatchObject({
+      subtotal: 1600,
+      discount: 100,
+      coupon_code: 'FLOWER100',
+      shipping_fee: 450,
+      total_amount: 1950
+    });
+
+    const persisted = db.prepare(
+      'SELECT subtotal, discount, coupon_code, shipping_fee, total_amount FROM orders WHERE id = ?'
+    ).get(response.body.data.id);
+    expect(persisted).toEqual({
+      subtotal: 1600,
+      discount: 100,
+      coupon_code: 'FLOWER100',
+      shipping_fee: 450,
+      total_amount: 1950
+    });
+  });
+
+  it('does not create an order, deduct stock or clear the cart when the coupon is rejected', async () => {
+    const member = await registerMember('coupon-rejected@example.com');
+    await addProductToCart(member.token, primaryProduct.id, 1);
+
+    const response = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${member.token}`)
+      .send({ ...ORDER_PAYLOAD, couponCode: 'FLOWER100' });
+
+    expectEnvelope(response, 400);
+    expect(response.body.data).toBeNull();
+    expect(response.body.error).toBe('COUPON_NOT_ELIGIBLE');
+    expect(db.prepare('SELECT COUNT(*) AS count FROM orders').get().count).toBe(0);
+    expect(db.prepare('SELECT stock FROM products WHERE id = ?').get(primaryProduct.id).stock).toBe(10);
+    expect(db.prepare('SELECT COUNT(*) AS count FROM cart_items WHERE user_id = ?').get(member.user.id).count).toBe(1);
+  });
+
   it('rolls back the entire transaction when an order item insert fails midway', async () => {
     const secondProduct = createProduct({
       name: '回滾測試花束',
